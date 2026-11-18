@@ -131,7 +131,7 @@ export function Sheet({ open, title, description, onClose, children }) {
         <motion.div
           initial={false}
           animate={reduceMotion ? { opacity: open ? 1 : 0 } : { opacity: open ? 1 : 0, y: open ? 0 : 10 }}
-          transition={open ? { duration: 0.5, delay: 0.1, ease: EASE_SPRING } : { duration: 0.2 }}
+          transition={open ? { duration: 0.4, delay: 0.06, ease: EASE_SPRING } : { duration: 0.2 }}
         >
           <h2 id={titleId} className="text-[22px] font-bold tracking-[-0.01em]">
             {title}
