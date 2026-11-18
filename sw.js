@@ -1,6 +1,9 @@
 // Офлайн-кеш: спершу мережа (щоб оновлення приходили одразу), без мережі — з кешу.
-const CACHE = 'shift-calendar-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-512.png'];
+const CACHE = 'shift-calendar-v2';
+const ASSETS = [
+  './', './index.html', './manifest.webmanifest', './icon.svg',
+  './app-icon-180.png', './app-icon-192.png', './app-icon-512.png',
+];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));

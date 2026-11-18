@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Графік змін</title>
 <meta name="theme-color" content="#f4f2ee" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111213" media="(prefers-color-scheme: dark)">
@@ -10,24 +10,34 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Графік">
+<meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" type="image/png" href="icon-180.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="app-icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="app-icon-180.png">
+<!-- заставка запуску: 393×852 @3x — iPhone 15 Pro (а також 14 Pro, 15, 16) -->
+<link rel="apple-touch-startup-image" href="splash-light.png"
+      media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)">
+<link rel="apple-touch-startup-image" href="splash-dark.png"
+      media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)">
 <style>
   :root {
     --bg: #f4f2ee;
+    --header-bg: rgba(244, 242, 238, 0.8);
     --card: #ffffff;
     --text: #1c1b19;
     --muted: #7a766e;
     --line: #e2ded6;
     --work: #2f5bea;
     --work-text: #ffffff;
+    --spring: cubic-bezier(0.32, 0.72, 0, 1);
     color-scheme: light dark;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #111213;
+      --header-bg: rgba(17, 18, 19, 0.78);
       --card: #1c1d20;
       --text: #ededeb;
       --muted: #8f8e8a;
@@ -38,44 +48,58 @@
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; touch-action: manipulation; }
   body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
     font: 16px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-    padding-bottom: calc(40px + env(safe-area-inset-bottom));
-    overscroll-behavior-y: none;
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none;
   }
   button { font: inherit; color: inherit; cursor: pointer; }
   [hidden] { display: none !important; }
 
-  .wrap { max-width: 480px; margin: 0 auto; padding: 0 16px; }
+  .wrap {
+    max-width: 480px; margin: 0 auto;
+    padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  }
 
   /* ── верхня панель ── */
   .top {
     position: sticky; top: 0; z-index: 5;
-    background: var(--bg);
-    padding-top: calc(14px + env(safe-area-inset-top));
-    border-bottom: 1px solid var(--line);
+    background: var(--header-bg);
+    -webkit-backdrop-filter: saturate(1.8) blur(20px);
+    backdrop-filter: saturate(1.8) blur(20px);
+    padding-top: calc(12px + env(safe-area-inset-top));
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s ease;
   }
+  .top.scrolled { border-bottom-color: var(--line); }
   .status { display: flex; align-items: center; gap: 12px; }
   .status-text { flex: 1; min-width: 0; }
   .status h1 {
-    margin: 0; font-size: 24px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em;
+    margin: 0; font-size: 25px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em;
     display: flex; align-items: center; gap: 10px;
   }
   .dot {
     width: 12px; height: 12px; border-radius: 4px; flex: none;
     border: 2px solid var(--muted);
+    transition: background-color 0.4s ease, border-color 0.4s ease, transform 0.5s var(--spring);
   }
-  .dot.work { background: var(--work); border-color: var(--work); }
-  .status p { margin: 4px 0 0; color: var(--muted); font-size: 15px; }
+  .dot.work { background: var(--work); border-color: var(--work); transform: scale(1.15); }
+  .status p { margin: 4px 0 0; color: var(--muted); font-size: 15px; min-height: 20px; }
+  .swap { animation: swap 0.45s var(--spring) both; }
+  @keyframes swap { from { opacity: 0; transform: translateY(7px); } }
+
   .icon-btn {
-    flex: none; width: 44px; height: 44px; border-radius: 14px;
+    flex: none; width: 46px; height: 46px; border-radius: 15px;
     border: 1px solid var(--line); background: var(--card);
     display: grid; place-items: center;
+    transition: transform 0.35s var(--spring);
   }
+  .icon-btn:active { transform: scale(0.9); transition-duration: 0.08s; }
   .icon-btn svg { width: 22px; height: 22px; }
   .weekdays {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
@@ -87,13 +111,20 @@
 
   /* ── місяці ── */
   .earlier {
-    display: block; margin: 14px auto 0; padding: 8px 14px;
-    border: 0; background: none; color: var(--muted); font-size: 14px;
+    display: block; margin: 12px auto 0; padding: 10px 16px;
+    border: 0; border-radius: 999px; background: none; color: var(--muted); font-size: 14px;
+    transition: opacity 0.2s ease, transform 0.35s var(--spring);
   }
-  .month { margin-top: 26px; }
-  .earlier + .month { margin-top: 10px; }
+  .earlier:active { opacity: 0.5; transform: scale(0.95); }
+  .month {
+    margin-top: 26px;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.75s var(--spring);
+  }
+  .month.in { opacity: 1; transform: none; }
+  .earlier + .month { margin-top: 8px; }
   .month-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
-  .month-head h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .month-head h2 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
   .month-head h2 span { color: var(--muted); font-weight: 500; }
   .month-head small { color: var(--muted); font-size: 14px; }
 
@@ -101,38 +132,78 @@
   .day {
     position: relative;
     aspect-ratio: 1; min-width: 0; padding: 0;
-    border: 0; border-radius: 13px;
+    border: 0; border-radius: 14px;
     background: transparent;
-    font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums;
+    font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums;
     display: grid; place-items: center;
+    transition: background-color 0.45s ease, color 0.45s ease, opacity 0.45s ease,
+                transform 0.4s var(--spring), box-shadow 0.3s ease;
   }
   .day.work { background: var(--work); color: var(--work-text); font-weight: 700; }
   .day.past { opacity: 0.35; }
   .day.today { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
-  .day.ovr::after {
+  .day.sel { transform: scale(1.12); z-index: 1; }
+  .day:active { transform: scale(0.86); transition-duration: 0.45s, 0.45s, 0.45s, 0.09s, 0.3s; transition-delay: 0s !important; }
+  .day::after {
     content: ""; position: absolute; bottom: 6px; left: 50%;
     width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%;
-    background: currentColor; opacity: 0.75;
+    background: currentColor; opacity: 0; transform: scale(0);
+    transition: opacity 0.3s ease, transform 0.45s var(--spring);
   }
-  .day:active { transform: scale(0.94); }
+  .day.ovr::after { opacity: 0.75; transform: scale(1); }
+
+  /* ── кнопка «Сьогодні» ── */
+  .fab {
+    position: fixed; left: 50%; z-index: 6;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    padding: 13px 20px; border: 0; border-radius: 999px;
+    background: var(--text); color: var(--bg);
+    font-size: 16px; font-weight: 600;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    opacity: 0; pointer-events: none;
+    transform: translate(-50%, 28px) scale(0.9);
+    transition: opacity 0.25s ease, transform 0.5s var(--spring);
+  }
+  .fab.show { opacity: 1; pointer-events: auto; transform: translate(-50%, 0) scale(1); }
+  .fab.show:active { transform: translate(-50%, 0) scale(0.94); transition-duration: 0.1s; }
 
   /* ── нижні шторки ── */
   dialog {
-    border: 0; padding: 0;
-    width: 100%; max-width: 480px;
-    margin: auto auto 0;
-    border-radius: 22px 22px 0 0;
-    background: var(--card); color: var(--text);
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+    background: transparent; color: var(--text);
+    overflow: hidden; touch-action: none; overscroll-behavior: contain;
   }
-  dialog::backdrop { background: rgba(0, 0, 0, 0.45); }
-  .sheet { padding: 22px 18px calc(18px + env(safe-area-inset-bottom)); }
-  .sheet h3 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
+  dialog::backdrop { background: transparent; }
+  .scrim {
+    position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45);
+    opacity: 0; transition: opacity 0.3s ease;
+  }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    max-width: 480px; margin: 0 auto;
+    padding: 10px max(18px, env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+    border-radius: 28px 28px 0 0;
+    background: var(--card);
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.16);
+    outline: 0;
+    transform: translateY(105%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.9, 0.6);
+    will-change: transform;
+  }
+  dialog.show .scrim { opacity: 1; transition-duration: 0.35s; }
+  dialog.show .sheet { transform: translateY(0); transition: transform 0.5s var(--spring); }
+  dialog.dragging .scrim, dialog.dragging .sheet { transition: none; }
+  .grabber { display: block; width: 38px; height: 5px; border-radius: 3px; background: var(--line); margin: 0 auto 16px; }
+  .sheet h3 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
   .sheet .sub { margin: 4px 0 18px; color: var(--muted); font-size: 15px; }
   .btn {
-    display: block; width: 100%; min-height: 52px; margin-top: 10px; padding: 8px 16px;
-    border: 0; border-radius: 15px;
+    display: block; width: 100%; min-height: 54px; margin-top: 10px; padding: 8px 16px;
+    border: 0; border-radius: 16px;
     background: var(--bg); font-size: 17px; font-weight: 600;
+    transition: transform 0.35s var(--spring), opacity 0.2s ease;
   }
+  .btn:active { transform: scale(0.97); opacity: 0.8; transition-duration: 0.08s; }
   .btn.primary { background: var(--work); color: var(--work-text); }
   .btn.plain { background: none; color: var(--muted); font-weight: 500; }
   .btn small { display: block; font-size: 13px; font-weight: 400; opacity: 0.7; margin-top: 2px; }
@@ -144,19 +215,31 @@
   .row:first-of-type { border-top: 0; }
   .stepper { display: flex; align-items: center; gap: 4px; }
   .stepper button {
-    width: 44px; height: 44px; border-radius: 13px; border: 0;
+    width: 46px; height: 46px; border-radius: 14px; border: 0;
     background: var(--bg); font-size: 22px; font-weight: 500; line-height: 1;
+    transition: transform 0.35s var(--spring);
   }
+  .stepper button:active { transform: scale(0.88); transition-duration: 0.08s; }
   .stepper output { width: 34px; text-align: center; font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bump { animation: bump 0.4s var(--spring); }
+  @keyframes bump { 35% { transform: scale(1.35); } }
   input[type="date"] {
-    font: inherit; color: inherit; min-height: 44px; padding: 6px 12px;
-    border: 0; border-radius: 13px; background: var(--bg);
+    font: inherit; color: inherit; min-height: 46px; padding: 6px 12px;
+    border: 0; border-radius: 14px; background: var(--bg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      transition-delay: 0s !important;
+    }
   }
 </style>
 </head>
 <body>
 
-<header class="top">
+<header class="top" id="top">
   <div class="wrap">
     <div class="status">
       <div class="status-text">
@@ -177,9 +260,13 @@
 
 <main class="wrap" id="months"></main>
 
+<button class="fab" id="toToday">↑ Сьогодні</button>
+
 <!-- шторка дня -->
 <dialog id="daySheet">
-  <div class="sheet">
+  <div class="scrim" data-close></div>
+  <div class="sheet" tabindex="-1" autofocus>
+    <i class="grabber"></i>
     <h3 id="dayTitle"></h3>
     <p class="sub" id="daySub"></p>
     <button class="btn" id="dayToggle"></button>
@@ -190,7 +277,9 @@
 
 <!-- шторка налаштувань -->
 <dialog id="settingsSheet">
-  <div class="sheet">
+  <div class="scrim" data-close></div>
+  <div class="sheet" tabindex="-1" autofocus>
+    <i class="grabber"></i>
     <h3>Графік</h3>
     <p class="sub">Скільки днів працюєш і скільки відпочиваєш</p>
     <div class="row">
@@ -220,6 +309,7 @@
   const MONTHS_AHEAD = 12;
 
   const $ = (id) => document.getElementById(id);
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // День як ціле число (кількість діб від епохи) — жодних сюрпризів із переведенням годинника.
   const dn = (y, m, d) => Math.floor(Date.UTC(y, m, d) / 864e5);
@@ -257,35 +347,106 @@
     return o != null ? o === 1 : base(n);
   };
 
-  // ── рендер ──
+  // ── календар: DOM будується один раз, далі лише перефарбовується (щоб кольори перетікали плавно) ──
+  const $months = $('months');
+  let sections = [];   // { el, m, idx, count, days: [{ el, n }] }
   let back = 0;        // скільки минулих місяців показано
-  let renderedFor = 0; // для якого «сьогодні» намальовано
+  let builtFor = 0;    // для якого «сьогодні» побудовано
 
-  function monthHtml(y, m, today) {
+  let ioFired = false;
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+    ioFired = true;
+    let k = 0;
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.style.transitionDelay = `${k++ * 90}ms`;
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  }, { rootMargin: '0px 0px -6% 0px' }) : null;
+  const reveal = (el) => { if (io) io.observe(el); else el.classList.add('in'); };
+
+  function makeMonth(idx) {
+    const now = fromDn(builtFor);
+    const total = now.m + idx;
+    const y = now.y + Math.floor(total / 12);
+    const m = ((total % 12) + 12) % 12;
     const first = dn(y, m, 1);
-    const days = new Date(y, m + 1, 0).getDate();
-    const offset = fromDn(first).wd;
-    let cells = '';
+    const count = new Date(y, m + 1, 0).getDate();
+    let cells = '<span></span>'.repeat(fromDn(first).wd);
+    for (let d = 1; d <= count; d++) cells += `<button class="day" data-n="${first + d - 1}">${d}</button>`;
+    const el = document.createElement('section');
+    el.className = 'month';
+    el.innerHTML = `<div class="month-head"><h2>${MONTHS[m]} <span>${y}</span></h2><small></small></div><div class="grid">${cells}</div>`;
+    return {
+      el, m, idx,
+      count: el.querySelector('small'),
+      days: [...el.querySelectorAll('.day')].map((b) => ({ el: b, n: +b.dataset.n })),
+    };
+  }
+
+  function paintMonth(sec, origin) {
     let workCount = 0;
-    for (let i = 0; i < offset; i++) cells += '<span></span>';
-    for (let d = 1; d <= days; d++) {
-      const n = first + d - 1;
+    for (const { el, n } of sec.days) {
       const w = isWork(n);
       if (w) workCount++;
-      const cls = ['day'];
-      if (w) cls.push('work');
-      if (n < today) cls.push('past');
-      if (n === today) cls.push('today');
-      if (state.overrides[n] != null) cls.push('ovr');
-      const label = `${d} ${MONTHS_GEN[m]}${w == null ? '' : w ? ', робочий' : ', вихідний'}`;
-      cells += `<button class="${cls.join(' ')}" data-n="${n}" aria-label="${label}">${d}</button>`;
+      el.className = 'day' + (w ? ' work' : '') + (n < builtFor ? ' past' : '') + (n === builtFor ? ' today' : '')
+        + (state.overrides[n] != null ? ' ovr' : '') + (n === sel && selShown ? ' sel' : '');
+      el.setAttribute('aria-label', `${el.textContent} ${MONTHS_GEN[sec.m]}${w == null ? '' : w ? ', робочий' : ', вихідний'}`);
+      // хвиля від обраного дня
+      el.style.transitionDelay = origin == null ? '' : `${90 + Math.min(Math.abs(n - origin) * 16, 480)}ms`;
     }
-    const count = state.anchor == null ? '' :
-      `<small>${workCount} ${plural(workCount, 'робочий', 'робочі', 'робочих')}</small>`;
-    return `<section class="month">
-      <div class="month-head"><h2>${MONTHS[m]} <span>${y}</span></h2>${count}</div>
-      <div class="grid">${cells}</div>
-    </section>`;
+    sec.count.textContent = state.anchor == null ? '' : `${workCount} ${plural(workCount, 'робочий', 'робочі', 'робочих')}`;
+  }
+
+  let waveTimer = 0;
+  function paint(origin) {
+    for (const s of sections) paintMonth(s, origin);
+    renderStatus(builtFor);
+    clearTimeout(waveTimer);
+    if (origin != null) {
+      waveTimer = setTimeout(() => {
+        for (const s of sections) for (const c of s.days) c.el.style.transitionDelay = '';
+      }, 1300);
+    }
+  }
+
+  function build() {
+    builtFor = todayDn();
+    if (io) io.disconnect();
+    $months.textContent = '';
+    const earlier = document.createElement('button');
+    earlier.className = 'earlier';
+    earlier.id = 'earlier';
+    earlier.textContent = '↑ Попередній місяць';
+    $months.append(earlier);
+    sections = [];
+    for (let i = -back; i < MONTHS_AHEAD; i++) {
+      const s = makeMonth(i);
+      sections.push(s);
+      $months.append(s.el);
+    }
+    paint();
+    for (const s of sections) reveal(s.el);
+  }
+
+  function addEarlier() {
+    back++;
+    const s = makeMonth(-back);
+    sections.unshift(s);
+    paintMonth(s);
+    $('earlier').after(s.el);
+    reveal(s.el);
+    scrollToY(0);
+  }
+
+  // ── статус ──
+  function setText(el, text) {
+    if (el.textContent === text) return;
+    el.textContent = text;
+    el.classList.remove('swap');
+    void el.offsetWidth;
+    el.classList.add('swap');
   }
 
   function renderStatus(t) {
@@ -305,27 +466,87 @@
       title = 'Сьогодні вихідний';
       sub = n === 1 ? 'Завтра на роботу' : n >= 90 ? '' : `На роботу: ${fmt(t + n)}`;
     }
-    $('statusTitle').textContent = title;
-    $('statusSub').textContent = sub;
+    setText($('statusTitle'), title);
+    setText($('statusSub'), sub);
     $('dot').className = 'dot' + (work ? ' work' : '');
     $('dot').hidden = state.anchor == null;
   }
 
-  function render() {
-    const t = todayDn();
-    renderedFor = t;
-    const now = fromDn(t);
-    let html = `<button class="earlier" id="earlier">↑ Попередній місяць</button>`;
-    for (let i = -back; i < MONTHS_AHEAD; i++) {
-      const idx = now.m + i;
-      html += monthHtml(now.y + Math.floor(idx / 12), ((idx % 12) + 12) % 12, t);
-    }
-    $('months').innerHTML = html;
-    renderStatus(t);
+  // ── шторки: виїжджають знизу, закриваються кнопкою, тапом по затемненню або свайпом униз ──
+  let dragEndedAt = 0;
+
+  function openSheet(dlg) {
+    if (dlg.open) return;
+    dlg.showModal();
+    void dlg.offsetHeight;
+    dlg.classList.add('show');
   }
 
+  function closeSheet(dlg) {
+    if (!dlg.open || dlg.dataset.closing) return;
+    dlg.dataset.closing = '1';
+    const sheet = dlg.querySelector('.sheet'), scrim = dlg.querySelector('.scrim');
+    dlg.classList.remove('show', 'dragging');
+    sheet.style.transform = '';
+    scrim.style.opacity = '';
+    if (dlg.id === 'daySheet') setSelShown(false);
+    setTimeout(() => { delete dlg.dataset.closing; dlg.close(); }, reduceMotion ? 0 : 320);
+  }
+
+  function setupSheet(dlg) {
+    const sheet = dlg.querySelector('.sheet'), scrim = dlg.querySelector('.scrim');
+    let pid = null, startY = 0, dy = 0, lastY = 0, lastT = 0, vel = 0, dragged = false;
+
+    sheet.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('input') || dlg.dataset.closing) return;
+      pid = e.pointerId; startY = lastY = e.clientY; lastT = e.timeStamp; dy = 0; vel = 0; dragged = false;
+    });
+    sheet.addEventListener('pointermove', (e) => {
+      if (e.pointerId !== pid) return;
+      dy = e.clientY - startY;
+      if (!dragged) {
+        if (dy < 8) return;
+        dragged = true;
+        dlg.classList.add('dragging');
+        try { sheet.setPointerCapture(pid); } catch {}
+      }
+      if (e.timeStamp > lastT) vel = (e.clientY - lastY) / (e.timeStamp - lastT);
+      lastY = e.clientY; lastT = e.timeStamp;
+      const y = Math.max(0, dy);
+      sheet.style.transform = `translateY(${y}px)`;
+      scrim.style.opacity = String(Math.max(0, 1 - y / sheet.offsetHeight));
+    });
+    const end = (e) => {
+      if (e.pointerId !== pid) return;
+      pid = null;
+      if (!dragged) return;
+      dragEndedAt = Date.now();
+      dlg.classList.remove('dragging');
+      if (dy > sheet.offsetHeight * 0.3 || vel > 0.5) closeSheet(dlg);
+      else { sheet.style.transform = ''; scrim.style.opacity = ''; }
+    };
+    sheet.addEventListener('pointerup', end);
+    sheet.addEventListener('pointercancel', end);
+
+    // після свайпу тап по кнопці під пальцем не повинен спрацювати
+    dlg.addEventListener('click', (e) => {
+      if (Date.now() - dragEndedAt < 350) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+    dlg.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeSheet(dlg); });
+    dlg.addEventListener('cancel', (e) => { e.preventDefault(); closeSheet(dlg); });
+  }
+  const $day = $('daySheet'), $settings = $('settingsSheet');
+  setupSheet($day);
+  setupSheet($settings);
+
   // ── шторка дня ──
-  let sel = null;
+  let sel = null, selShown = false;
+  function setSelShown(on) {
+    selShown = on;
+    const b = sel != null && $months.querySelector(`.day[data-n="${sel}"]`);
+    if (b) b.classList.toggle('sel', on);
+  }
+
   function openDay(n) {
     sel = n;
     const d = fromDn(n);
@@ -338,11 +559,12 @@
     toggle.hidden = !configured;
     toggle.textContent = hasOvr ? 'Повернути як за графіком' : isWork(n) ? 'Зробити вихідним' : 'Зробити робочим';
     $('dayAnchor').classList.toggle('primary', !configured);
-    $('daySheet').showModal();
+    setSelShown(true);
+    openSheet($day);
   }
 
-  $('months').addEventListener('click', (e) => {
-    if (e.target.closest('#earlier')) { back++; render(); window.scrollTo(0, 0); return; }
+  $months.addEventListener('click', (e) => {
+    if (e.target.closest('#earlier')) { addEarlier(); return; }
     const b = e.target.closest('.day');
     if (b) openDay(+b.dataset.n);
   });
@@ -350,13 +572,13 @@
   $('dayToggle').addEventListener('click', () => {
     if (state.overrides[sel] != null) delete state.overrides[sel];
     else state.overrides[sel] = base(sel) ? 0 : 1;
-    save(); render(); $('daySheet').close();
+    save(); closeSheet($day); paint();
   });
 
   $('dayAnchor').addEventListener('click', () => {
     state.anchor = sel;
     delete state.overrides[sel];
-    save(); render(); $('daySheet').close();
+    save(); closeSheet($day); paint(sel);
   });
 
   // ── налаштування ──
@@ -368,39 +590,66 @@
     $('resetOverrides').hidden = count === 0;
     $('resetOverrides').textContent = `Скинути ручні зміни (${count})`;
   }
-  $('openSettings').addEventListener('click', () => { syncSettings(); $('settingsSheet').showModal(); });
-  $('settingsSheet').addEventListener('click', (e) => {
+  $('openSettings').addEventListener('click', () => { syncSettings(); openSheet($settings); });
+  $settings.addEventListener('click', (e) => {
     const s = e.target.closest('[data-step]');
     if (!s) return;
     const k = s.dataset.step;
-    state[k] = Math.min(14, Math.max(1, state[k] + +s.dataset.d));
-    save(); render(); syncSettings();
+    const next = Math.min(14, Math.max(1, state[k] + +s.dataset.d));
+    if (next === state[k]) return;
+    state[k] = next;
+    save(); paint(); syncSettings();
+    const out = $(k + 'Out');
+    out.classList.remove('bump');
+    void out.offsetWidth;
+    out.classList.add('bump');
   });
   $('anchorInput').addEventListener('change', (e) => {
     const v = e.target.value;
     if (!v) return;
     const [y, m, d] = v.split('-').map(Number);
     state.anchor = dn(y, m - 1, d);
-    save(); render();
+    save(); paint(state.anchor);
   });
   $('resetOverrides').addEventListener('click', () => {
     state.overrides = {};
-    save(); render(); syncSettings();
+    save(); paint(); syncSettings();
   });
 
-  // закриття шторок: кнопка або тап по затемненню
-  for (const dlg of document.querySelectorAll('dialog')) {
-    dlg.addEventListener('click', (e) => {
-      if (e.target === dlg || e.target.closest('[data-close]')) dlg.close();
-    });
+  // ── прокрутка: лінія під шапкою та кнопка «Сьогодні» ──
+  const $top = $('top'), $fab = $('toToday');
+  const scrollToY = (top) => window.scrollTo({ top, behavior: reduceMotion ? 'auto' : 'smooth' });
+  const currentMonth = () => sections.find((s) => s.idx === 0);
+  let ticking = false;
+  function onScroll() {
+    ticking = false;
+    $top.classList.toggle('scrolled', window.scrollY > 2);
+    const cur = currentMonth();
+    if (!cur) return;
+    const r = cur.el.getBoundingClientRect();
+    $fab.classList.toggle('show', r.bottom < $top.offsetHeight + 40 || r.top > window.innerHeight - 80);
   }
+  window.addEventListener('scroll', () => {
+    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+  }, { passive: true });
+  $fab.addEventListener('click', () => {
+    const cur = currentMonth();
+    scrollToY(back === 0 || !cur ? 0 : cur.el.getBoundingClientRect().top + window.scrollY - $top.offsetHeight - 10);
+  });
 
   // застосунок міг провисіти у фоні до наступного дня
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && todayDn() !== renderedFor) render();
+    if (!document.hidden && todayDn() !== builtFor) build();
   });
 
-  render();
+  // iOS: щоб працював :active і не було масштабування щипком
+  document.addEventListener('touchstart', () => {}, { passive: true });
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
+
+  build();
+  onScroll();
+  // страховка: якщо спостерігач чомусь не спрацював, місяці не повинні лишитися невидимими
+  setTimeout(() => { if (!ioFired) for (const s of sections) s.el.classList.add('in'); }, 1500);
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
