@@ -1,9 +1,8 @@
 // Офлайн-кеш: спершу мережа (щоб оновлення приходили одразу), без мережі — з кешу.
-const CACHE = 'shift-calendar-v3';
-const ASSETS = [
-  './', './index.html', './manifest.webmanifest', './icon.svg',
-  './app-icon-180.png', './app-icon-192.png', './app-icon-512.png',
-];
+// Два значення нижче під час збірки підставляє vite.config.js.
+const BUILD = '__BUILD__';
+const ASSETS = /*__PRECACHE__*/ ['./'];
+const CACHE = `shift-calendar-${BUILD}`;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
