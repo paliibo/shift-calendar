@@ -1,5 +1,5 @@
 // Офлайн-кеш: спершу мережа (щоб оновлення приходили одразу), без мережі — з кешу.
-const CACHE = 'shift-calendar-v2';
+const CACHE = 'shift-calendar-v3';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest', './icon.svg',
   './app-icon-180.png', './app-icon-192.png', './app-icon-512.png',
