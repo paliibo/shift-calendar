@@ -1,6 +1,6 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react'
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'framer-motion'
-import { SHEET_SPRING } from '@/lib/motion'
+import { EASE_SPRING, SHEET_OPEN, SHEET_SPRING } from '@/lib/motion'
 
 /**
  * Нижня шторка на рідному <dialog>: браузер сам робить решту сторінки неактивною,
@@ -51,7 +51,7 @@ export function Sheet({ title, description, onClose, children }) {
       travel.current = distance
       setExitY(distance)
       y.set(distance)
-      controls = animate(y, 0, SHEET_SPRING)
+      controls = animate(y, 0, SHEET_OPEN)
     }
 
     return () => {
@@ -107,11 +107,18 @@ export function Sheet({ title, description, onClose, children }) {
         }}
       >
         <i className="mx-auto mb-4 block h-[5px] w-[38px] rounded-full bg-border" />
-        <h2 id={titleId} className="text-[22px] font-bold tracking-[-0.01em]">
-          {title}
-        </h2>
-        <p className="mt-1 mb-[18px] text-[15px] text-muted-foreground">{description}</p>
-        {children}
+        {/* вміст проявляється трохи згодом за самою панеллю — поява виходить багатошаровою, а не різкою */}
+        <motion.div
+          initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: EASE_SPRING }}
+        >
+          <h2 id={titleId} className="text-[22px] font-bold tracking-[-0.01em]">
+            {title}
+          </h2>
+          <p className="mt-1 mb-[18px] text-[15px] text-muted-foreground">{description}</p>
+          {children}
+        </motion.div>
       </motion.div>
     </dialog>
   )
