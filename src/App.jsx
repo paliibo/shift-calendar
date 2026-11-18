@@ -165,6 +165,7 @@ export default function App() {
 
       <header
         ref={headerRef}
+        inert={sheet !== null}
         data-scrolled={scrolled ? '' : undefined}
         className="sticky top-0 z-10 border-b border-transparent bg-(--app-header) pt-[calc(10px+env(safe-area-inset-top))] backdrop-blur-[20px] backdrop-saturate-[1.8] transition-colors duration-400 data-scrolled:border-border"
       >
@@ -215,6 +216,7 @@ export default function App() {
 
       <motion.main
         ref={monthsRef}
+        inert={sheet !== null}
         className={WRAP}
         initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
@@ -242,6 +244,7 @@ export default function App() {
       <AnimatePresence>
         {awayFromToday && (
           <motion.div
+            inert={sheet !== null}
             className="pointer-events-none fixed inset-x-0 bottom-[calc(18px+env(safe-area-inset-bottom))] z-10 flex justify-center"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 26, scale: 0.92 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -255,34 +258,29 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {sheet === 'day' && selected != null && (
-          <DaySheet
-            key="day"
-            day={selected}
-            schedule={schedule}
-            onClose={closeSheet}
-            onToggle={(day) => {
-              toggleOverride(day)
-              closeSheet()
-            }}
-            onAnchor={(day) => {
-              setAnchor(day)
-              closeSheet()
-            }}
-          />
-        )}
-        {sheet === 'settings' && (
-          <SettingsSheet
-            key="settings"
-            schedule={schedule}
-            onClose={closeSheet}
-            onStep={stepRun}
-            onAnchor={setAnchor}
-            onReset={resetOverrides}
-          />
-        )}
-      </AnimatePresence>
+      {/* шторки лежать у DOM постійно й лише виїжджають — нічого не монтується посеред руху */}
+      <DaySheet
+        open={sheet === 'day'}
+        day={selected ?? today}
+        schedule={schedule}
+        onClose={closeSheet}
+        onToggle={(day) => {
+          toggleOverride(day)
+          closeSheet()
+        }}
+        onAnchor={(day) => {
+          setAnchor(day)
+          closeSheet()
+        }}
+      />
+      <SettingsSheet
+        open={sheet === 'settings'}
+        schedule={schedule}
+        onClose={closeSheet}
+        onStep={stepRun}
+        onAnchor={setAnchor}
+        onReset={resetOverrides}
+      />
     </>
   )
 }

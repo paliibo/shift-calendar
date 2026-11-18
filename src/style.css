@@ -51,9 +51,6 @@
   button { cursor: pointer; }
   :where(button, input):focus-visible { outline: 2px solid CanvasText; outline-offset: 2px; }
 
-  /* сторінка під відкритою шторкою не прокручується */
-  dialog:modal { overscroll-behavior: contain; }
-  dialog::backdrop { overflow: hidden; overscroll-behavior: contain; }
 }
 
 /* Те, що утилітами не висловити: кілька переходів із різною тривалістю та прокрутка як таймлайн. */
